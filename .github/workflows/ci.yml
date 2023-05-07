@@ -32,7 +32,7 @@ jobs:
     runs-on: windows-latest
     env:
       PLATFORM: x64
-      WIRESHARK_LIB_DIR: C:/wireshark-win64-libs-3.4
+      WIRESHARK_LIB_DIR: C:/wireshark-win64-libs-4.0
       GLIB_INCLUDE: vcpkg-export-20190318-win64ws/installed/x64-windows/include
     steps:
       - name: Checkout Wireshark
