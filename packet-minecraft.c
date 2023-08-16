@@ -1,4 +1,4 @@
-#include <config.h>
+#include "config.h"
 
 #define WS_BUILD_DLL
 
