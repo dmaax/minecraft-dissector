@@ -32,23 +32,21 @@ jobs:
     runs-on: windows-latest
     env:
       PLATFORM: x64
-      WIRESHARK_LIB_DIR: C:/wireshark-win64-libs-4.0
+      WIRESHARK_LIB_DIR: C:/wireshark-win64-libs-4.2
       GLIB_INCLUDE: vcpkg-export-20190318-win64ws/installed/x64-windows/include
     steps:
       - name: Checkout Wireshark
         uses: actions/checkout@v2
         with:
           repository: wireshark/wireshark
-          ref: wireshark-4.0.5
+          ref: wireshark-4.2.2
           path: wireshark
       - name: Choco install Wireshark Deps
         run: choco install -y --no-progress cmake winflexbison3 strawberryperl asciidoctorj xsltproc docbook-bundle
-      - name: python stuff
-        run: choco install -y --no-progress python3 -version 3.6
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild
         with:
-          vs-version: 16.4
+          vs-version: 17
       - run: mkdir build
         working-directory: wireshark
       - run: cmake -A x64 .. -DBUILD_wireshark=OFF
