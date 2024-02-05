@@ -14,16 +14,16 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: sudo add-apt-repository ppa:wireshark-dev/stable
       - run: sudo apt-get install make gcc pkg-config wireshark-dev
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: make packet-minecraft.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: linux
           path: packet-minecraft.so
@@ -79,16 +79,16 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download linux artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: linux
 #      - name: Download windows artifact
-#        uses: actions/download-artifact@v2
+#        uses: actions/download-artifact@v4
 #        with:
 #          name: windows
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -97,7 +97,7 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload packet-minecraft.so
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -106,7 +106,7 @@ jobs:
           asset_name: packet-minecraft.so
           asset_content_type: application/octet-stream
 #      - name: Upload packet-minecraft.dll
-#        uses: actions/upload-release-asset@v1
+#        uses: actions/upload-release-asset@v4
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
