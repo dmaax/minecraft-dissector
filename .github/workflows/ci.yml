@@ -21,7 +21,7 @@ jobs:
       - run: sudo apt-get install make gcc pkg-config wireshark-dev
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 20
       - run: make packet-minecraft.so
       - uses: actions/upload-artifact@v2
         with:
