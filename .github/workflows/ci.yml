@@ -44,7 +44,7 @@ jobs:
       - name: Choco install Wireshark Deps
         run: choco install -y --no-progress cmake winflexbison3 strawberryperl asciidoctorj xsltproc docbook-bundle
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild
+        uses: microsoft/setup-msbuild@1.1.3
         with:
           vs-version: 17
       - run: mkdir build
