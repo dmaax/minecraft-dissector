@@ -43,6 +43,8 @@ jobs:
           path: wireshark
       - name: Choco install Wireshark Deps
         run: choco install -y --no-progress cmake winflexbison3 strawberryperl asciidoctorj xsltproc docbook-bundle
+      - name: python stuff
+        run: choco install -y --no-progress python3 -version=3.6
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
         with:
