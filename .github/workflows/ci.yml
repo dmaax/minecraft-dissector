@@ -33,7 +33,7 @@ jobs:
     env:
       PLATFORM: x64
       WIRESHARK_LIB_DIR: C:/wireshark-win64-libs-4.2
-      GLIB_INCLUDE: vcpkg-export-20190318-win64ws/installed/x64-windows/include
+      GLIB_INCLUDE: vcpkg-export-*-win64ws/installed/x64-windows/include
     steps:
       - name: Checkout Wireshark
         uses: actions/checkout@v2
