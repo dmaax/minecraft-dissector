@@ -63,11 +63,20 @@ jobs:
         run: cmake -A x64 .. -DUSE_qt6=OFF -DBUILD_wireshark=OFF -DENABLE_APPLICATION_BUNDLE=OFF
         working-directory: wireshark/build
 
-      - name: Build epan
-        run: cmake --build . --config RelWithDebInfo --target epan
+      - name: Build epan and required libraries
+        run: |
+          cmake --build . --config RelWithDebInfo --target epan
+          cmake --build . --config RelWithDebInfo --target wiretap  
+          cmake --build . --config RelWithDebInfo --target wsutil
         working-directory: wireshark/build
 
-      - name: Checkout dissector
+      - name: Copy config header
+        run: |
+          copy wireshark\build\config.h wireshark\
+          if (!(Test-Path "wireshark\wireshark.h")) {
+            echo '#include "config.h"' > wireshark\wireshark.h
+          }
+        shell: powershell
         uses: actions/checkout@v4
         with:
           path: dissector
@@ -83,8 +92,8 @@ jobs:
       - name: Build DLL
         run: make packet-minecraft.dll
         env:
-          CPPFLAGS: -I../wireshark/build -I../wireshark -I${{ env.WIRESHARK_LIB_DIR }}/${{ env.GLIB_INCLUDE }} -D_SSIZE_T_DEFINED
-          LDLIBS: ../wireshark/build/run/RelWithDebInfo/wireshark.lib
+          CPPFLAGS: -I../wireshark/build -I../wireshark -I../wireshark/epan -I../wireshark/wiretap -I../wireshark/wsutil -I${{ env.WIRESHARK_LIB_DIR }}/${{ env.GLIB_INCLUDE }} -D_SSIZE_T_DEFINED -DHAVE_CONFIG_H
+          LDLIBS: ../wireshark/build/run/RelWithDebInfo/epan.lib ../wireshark/build/run/RelWithDebInfo/wiretap.lib ../wireshark/build/run/RelWithDebInfo/wsutil.lib
           CC: gcc
         working-directory: dissector
 
