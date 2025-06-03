@@ -77,6 +77,8 @@ jobs:
             echo '#include "config.h"' > wireshark\wireshark.h
           }
         shell: powershell
+
+      - name: Checkout dissector
         uses: actions/checkout@v4
         with:
           path: dissector
