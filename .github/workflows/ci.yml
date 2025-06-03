@@ -60,7 +60,7 @@ jobs:
         working-directory: wireshark
 
       - name: Configure CMake
-        run: cmake -A x64 .. -DBUILD_qt=OFF -DENABLE_QT6=OFF -DWITH_QT=OFF -DENABLE_APPLICATION_BUNDLE=OFF
+        run: cmake -A x64 .. -DUSE_qt6=OFF -DBUILD_wireshark=OFF -DENABLE_APPLICATION_BUNDLE=OFF
         working-directory: wireshark/build
 
       - name: Build epan
