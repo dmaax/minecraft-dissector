@@ -60,7 +60,7 @@ jobs:
         working-directory: wireshark
 
       - name: Configure CMake
-        run: cmake -A x64 .. -DBUILD_wireshark=OFF
+        run: cmake -A x64 ..
         working-directory: wireshark/build
 
       - name: Build epan
