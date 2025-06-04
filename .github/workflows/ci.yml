@@ -70,12 +70,84 @@ jobs:
           cmake --build . --config RelWithDebInfo --target wsutil
         working-directory: wireshark/build
 
-      - name: Copy config header
+      - name: Copy config header and create missing headers
         run: |
-          copy wireshark\build\config.h wireshark\
+          # Copia o config.h
+          Copy-Item "wireshark\build\config.h" "wireshark\"
+          
+          # Cria wireshark.h com encoding correto (UTF-8)
           if (!(Test-Path "wireshark\wireshark.h")) {
-            echo '#include "config.h"' > wireshark\wireshark.h
+            $content = '#include "config.h"'
+            [System.IO.File]::WriteAllText("wireshark\wireshark.h", $content, [System.Text.UTF8Encoding]::new($false))
+            Write-Host "Created wireshark.h"
           }
+          
+          # Cria ws_symbol_export.h em múltiplos locais onde pode ser necessário
+          $wsSymbolContent = @"
+#ifndef __WS_SYMBOL_EXPORT_H__
+#define __WS_SYMBOL_EXPORT_H__
+
+#ifdef _WIN32
+  #ifdef BUILDING_DLL
+    #define WS_DLL_PUBLIC __declspec(dllexport)
+  #else
+    #define WS_DLL_PUBLIC __declspec(dllimport)
+  #endif
+  #define WS_DLL_LOCAL
+#else
+  #define WS_DLL_PUBLIC __attribute__ ((visibility ("default")))
+  #define WS_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#endif
+
+#endif /* __WS_SYMBOL_EXPORT_H__ */
+"@
+          
+          # Cria em vários diretórios onde pode ser procurado
+          $locations = @(
+            "wireshark\ws_symbol_export.h",
+            "wireshark\wsutil\ws_symbol_export.h", 
+            "wireshark\wiretap\ws_symbol_export.h",
+            "wireshark\epan\ws_symbol_export.h"
+          )
+          
+          foreach ($location in $locations) {
+            $dir = Split-Path $location -Parent
+            if (!(Test-Path $dir)) {
+              New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            }
+            if (!(Test-Path $location)) {
+              [System.IO.File]::WriteAllText($location, $wsSymbolContent, [System.Text.UTF8Encoding]::new($false))
+              Write-Host "Created $location"
+            }
+          }
+        shell: powershell
+
+      - name: Debug - Check created files
+        run: |
+          Write-Host "=== Checking created files ==="
+          if (Test-Path "wireshark\wireshark.h") {
+            Write-Host "✓ wireshark.h exists"
+            Get-Content "wireshark\wireshark.h" | Write-Host
+          } else {
+            Write-Host "✗ wireshark.h missing"
+          }
+          
+          Write-Host "`n=== Checking ws_symbol_export.h locations ==="
+          $locations = @(
+            "wireshark\ws_symbol_export.h",
+            "wireshark\wsutil\ws_symbol_export.h", 
+            "wireshark\wiretap\ws_symbol_export.h"
+          )
+          foreach ($loc in $locations) {
+            if (Test-Path $loc) {
+              Write-Host "✓ $loc exists"
+            } else {
+              Write-Host "✗ $loc missing"
+            }
+          }
+          
+          Write-Host "`n=== Directory structure ==="
+          Get-ChildItem "wireshark" -Recurse -Name | Select-Object -First 20 | Write-Host
         shell: powershell
 
       - name: Checkout dissector
@@ -94,7 +166,7 @@ jobs:
       - name: Build DLL
         run: make packet-minecraft.dll
         env:
-          CPPFLAGS: -I../wireshark/build -I../wireshark -I../wireshark/epan -I../wireshark/wiretap -I../wireshark/wsutil -I${{ env.WIRESHARK_LIB_DIR }}/${{ env.GLIB_INCLUDE }} -D_SSIZE_T_DEFINED -DHAVE_CONFIG_H
+          CPPFLAGS: -I../wireshark/build -I../wireshark -I../wireshark/epan -I../wireshark/wiretap -I../wireshark/wsutil -I../wireshark/build/wsutil -I${{ env.WIRESHARK_LIB_DIR }}/${{ env.GLIB_INCLUDE }} -D_SSIZE_T_DEFINED -DHAVE_CONFIG_H -DBUILDING_DLL
           LDLIBS: ../wireshark/build/run/RelWithDebInfo/epan.lib ../wireshark/build/run/RelWithDebInfo/wiretap.lib ../wireshark/build/run/RelWithDebInfo/wsutil.lib
           CC: gcc
         working-directory: dissector
